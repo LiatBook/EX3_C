@@ -6,7 +6,7 @@ StrList: StrList.o  Main.o
 StrList.o: StrList.c
 	gcc -Wall -g -c StrList.c -o StrList.o
 
-Check.o: Main.c
+Main.o: Main.c
 	gcc -Wall -g -c Main.c -o Main.o
 
 clean:
