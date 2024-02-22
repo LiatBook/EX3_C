@@ -24,16 +24,21 @@ Node* Node_alloc( const char * data,Node* next) {
      Node* p = (Node*)malloc(sizeof(Node));
     if (p != NULL) {
         // Allocate memory for the string and copy its content
-        p->_data = (char*)malloc(strlen(data) + 1);
-        if (p->_data != NULL) {
-            strcpy(p->_data, data);
-            p->_next = next;
+        p->_data = strdup(data);
+        if (p->_data == NULL) {
+            free(p);
+            return NULL;
         } 
+        p->_next=next;
     }
     return p;
 }
 
 void Node_free(Node* node) {
+    if(node==NULL){
+        return;
+    }
+    free(node->_data);
     free(node);
 }
 //------------------------------------------------
@@ -46,23 +51,27 @@ void Node_free(Node* node) {
 
 StrList* StrList_alloc() {
     StrList* p= (StrList*)malloc(sizeof(StrList));
+    if(p!=NULL){
         p->_head= NULL;
         p->_size= 0;
-    
+    }
     return p;
 }
 
-void StrList_free(StrList* StrList) {
-    if (StrList==NULL) return;
-    Node* p1= StrList->_head;
-    Node* p2;
-    while(p1) {
-        p2= p1;
-        p1= p1->_next;
-        Node_free(p2);
+void StrList_free(StrList* strList) {
+    if (strList != NULL) {
+        Node* current = strList->_head;
+        Node* next;
+        while (current != NULL) {
+            next = current->_next;
+            Node_free(current);
+            current = next;
+        }
+        free(strList);
     }
-    free(StrList);
 }
+	
+
 
 size_t StrList_size(const StrList* StrList) {
     return StrList->_size;
@@ -175,6 +184,13 @@ int StrList_count(StrList* Strlist, const char* data)
 
     void StrList_remove(StrList* StrList, const char* data)
 {
+    if(StrList==NULL || StrList_size(StrList)==0){
+        return;
+    }
+    if(StrList==NULL){
+        return;
+    }
+
     Node* current = StrList->_head;
     Node* previous = NULL;
 
@@ -206,9 +222,14 @@ int StrList_count(StrList* Strlist, const char* data)
 }
  
 void StrList_removeAt(StrList* StrList, int index)
-{ if(index<0 || index > StrList->_size){
+{ 
+    if(StrList==NULL || StrList_size(StrList)==0){
         return;
     }
+    if(index<0 || index > StrList->_size){
+        return;
+    }
+    
     Node* current = StrList->_head;
     Node* prev = NULL;
 
@@ -238,16 +259,21 @@ void StrList_removeAt(StrList* StrList, int index)
 int StrList_isEqual(const StrList* StrList1, const StrList* StrList2) {
     const int eq= 0;
     const int neq= 1;
+
+    if((StrList1==NULL && StrList2==NULL )|| (StrList_size(StrList1)==0 && StrList_size(StrList2)==0)){
+        return neq;
+    }
     
     const Node* p1= StrList1->_head;
     const Node* p2= StrList2->_head;
+    // if(p1==NULL && p2==NULL) return neq;
     while(p1) {
-        if (p2==NULL||p1->_data!=p2->_data) return neq;
+        if (p2==NULL||strcmp(p1->_data,p2->_data)) return eq;
         p1= p1->_next;
         p2= p2->_next;
     }
-    if (p2!=NULL) return neq;
-    return eq;
+    if (p2!=NULL && p1==NULL) return eq;
+    return neq;
 }
 
 StrList* StrList_clone(const StrList* StrLis) {
@@ -265,6 +291,9 @@ StrList* StrList_clone(const StrList* StrLis) {
 
 void StrList_reverse( StrList* StrList)
 {
+    if(StrList==NULL || StrList_size(StrList)==0){
+        return;
+    }
 
     Node* current = StrList->_head;
     Node* prev = NULL;
@@ -287,6 +316,9 @@ void swapNodes(Node* node1, Node* node2) {
 }
 void StrList_sort( StrList* StrList)
 {
+    if(StrList==NULL || StrList_size(StrList)==0){
+        return;
+    }
  if (StrList->_head == NULL || StrList->_size <= 1) {
         // Nothing to sort if the list is empty or has only one element
         return;
